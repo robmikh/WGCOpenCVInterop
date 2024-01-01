@@ -5,7 +5,7 @@
 #include <Unknwn.h>
 #include <inspectable.h>
 
-// Windows
+// WinRT
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Graphics.Capture.h>
 #include <winrt/Windows.Graphics.DirectX.h>
