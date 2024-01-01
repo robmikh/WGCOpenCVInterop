@@ -12,4 +12,4 @@ This demo uses [`vcpkg`](https://github.com/microsoft/vcpkg) to generate a Nuget
 > vcpkg export opencv:x64-windows --nuget
 ```
 
-Then reference a custom [Nuget source](https://learn.microsoft.com/en-us/nuget/consume-packages/install-use-packages-visual-studio#package-sources) containing the resuliting Nuget package (e.g. a folder somehwere on your computer).
+Then reference a custom [Nuget source](https://learn.microsoft.com/en-us/nuget/consume-packages/install-use-packages-visual-studio#package-sources) containing the resuliting Nuget package (e.g. a folder somewhere on your computer).
