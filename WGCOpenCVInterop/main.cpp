@@ -31,15 +31,20 @@ int wmain()
     // Initialize OpenCV
     auto cvContext = cv::directx::ocl::initializeContextFromD3D11Device(d3d11Device.get());
 
+    // Get the dimensions of our texture
+    D3D11_TEXTURE2D_DESC desc = {};
+    stagingTexture->GetDesc(&desc);
+    auto width = desc.Width;
+    auto height = desc.Height;
+
     // Convert our D3D11 texture to OpenCV's Mat
-    auto itemSize = item.Size();
-    cv::Mat input(itemSize.Height, itemSize.Width, CV_8UC4);
+    cv::Mat input(height, width, CV_8UC4);
     cv::directx::convertFromD3D11Texture2D(stagingTexture.get(), input);
     // DEBUG: Test the conversion
     cv::imwrite("input.jpg", input);
 
     // We need a grayscale image for the contours demo
-    cv::Mat grayscale(itemSize.Height, itemSize.Width, CV_8UC1);
+    cv::Mat grayscale(height, width, CV_8UC1);
     cv::cvtColor(input, grayscale, cv::COLOR_BGRA2GRAY);
     // DEBUG: Save the grayscale image
     cv::imwrite("grayscale.jpg", grayscale);
@@ -57,7 +62,7 @@ int wmain()
     }
 
     // Draw the contours to an image
-    cv::Mat outputImage = cv::Mat::zeros(itemSize.Height, itemSize.Width, CV_8UC3);
+    cv::Mat outputImage = cv::Mat::zeros(height, width, CV_8UC3);
     cv::drawContours(outputImage, contours, 3, cv::Scalar(128, 255, 255), 3, cv::LINE_AA, hierarchy);
     cv::imwrite("output.jpg", outputImage);
 
