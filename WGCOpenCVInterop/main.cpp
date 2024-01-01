@@ -25,9 +25,44 @@ int wmain()
     auto item = GetCaptureItemForPrimaryMonitor();
     auto texture = CaptureSingleFrame(d3d11Device, item);
 
+    // OpenCV requires a texture that can be read from the CPU
+    auto stagingTexture = util::CopyD3DTexture(d3d11Device, texture, true);
+
     // Initialize OpenCV
     auto cvContext = cv::directx::ocl::initializeContextFromD3D11Device(d3d11Device.get());
-    
+
+    // Convert our D3D11 texture to OpenCV's Mat
+    auto itemSize = item.Size();
+    cv::Mat input(itemSize.Height, itemSize.Width, CV_8UC4);
+    cv::directx::convertFromD3D11Texture2D(stagingTexture.get(), input);
+    // DEBUG: Test the conversion
+    cv::imwrite("input.jpg", input);
+
+    // We need a grayscale image for the contours demo
+    cv::Mat grayscale(itemSize.Height, itemSize.Width, CV_8UC1);
+    cv::cvtColor(input, grayscale, cv::COLOR_BGRA2GRAY);
+    // DEBUG: Save the grayscale image
+    cv::imwrite("grayscale.jpg", grayscale);
+
+    // The rest is based on the OpenCV contours demo
+    // https://docs.opencv.org/3.4/da/d32/samples_2cpp_2contours2_8cpp-example.html
+    std::vector<std::vector<cv::Point>> contours0;
+    std::vector<cv::Vec4i> hierarchy;
+    cv::findContours(grayscale, contours0, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+
+    std::vector<std::vector<cv::Point>> contours(contours0.size());
+    for (auto i = 0; i < contours0.size(); i++)
+    {
+        cv::approxPolyDP(cv::Mat(contours0[i]), contours[i], 3, true);
+    }
+
+    // Draw the contours to an image
+    cv::Mat outputImage = cv::Mat::zeros(itemSize.Height, itemSize.Width, CV_8UC3);
+    cv::drawContours(outputImage, contours, 3, cv::Scalar(128, 255, 255), 3, cv::LINE_AA, hierarchy);
+    cv::imwrite("output.jpg", outputImage);
+
+    wprintf(L"Success!\n");
+
     return 0;
 }
 
